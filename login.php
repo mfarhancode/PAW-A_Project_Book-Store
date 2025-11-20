@@ -35,6 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['name'] = $user_data['name'];
             $_SESSION['username'] = $user_data['username'];
             $_SESSION['level'] = $user_data['level'];
+            $_SESSION['id'] = $user_data['id'];
 
             if ($user_data['level'] == 'seller'){
             header("Location: seller/seller_dashboard.php");
@@ -55,3 +56,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 ?>
+
+<p>Don't have an account yet? <a href="register.php"> Create account</a></p>
