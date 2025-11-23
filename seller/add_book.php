@@ -21,6 +21,7 @@ $penulis = $_POST['penulis'] ?? "";
 $tahun = $_POST['tahun'] ?? "";
 $stok = $_POST['stok'] ?? "";
 $description = $_POST['description'] ?? "";
+$category = $_POST['category'] ?? "";
 $harga = $_POST['harga'] ?? "";
 $pdf_file = $_POST['pdf_file'] ?? "";
 $errors = [];
@@ -104,6 +105,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     <label>Tahun:</label>
     <input type="number" name="tahun" value="<?= htmlspecialchars($tahun) ?>">
+    <br>
+
+    <label>Category:</label>
+    <input type="text" name="category" value="<?= htmlspecialchars($category) ?>">
     <br>
 
     <label>Stok:</label>
