@@ -1,6 +1,6 @@
 <?php
 session_start();
-if (!($_SESSION['login'])) {
+if (!($_SESSION['login']) || $_SESSION['level'] != 'seller') {
     header("Location: ../login.php");
     exit;
 }
