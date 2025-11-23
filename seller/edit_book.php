@@ -29,6 +29,7 @@ $isbn = $_POST['isbn'];
 $judul = $_POST['judul'];
 $penulis = $_POST['penulis'];
 $tahun = $_POST['tahun'];
+$category = $_POST['category'];
 $stok = $_POST['stok'];
 $description = $_POST['description'];
 $harga = $_POST['harga'];
@@ -112,6 +113,10 @@ $pdf_file = $_POST['pdf_file'];
 
     <label>Tahun:</label>
     <input type="number" name="tahun" value="<?= $data['tahun']  ?>">
+    <br>
+
+    <label>Category:</label>
+    <input type="text" name="category" value="<?= $data['category']  ?>">
     <br>
 
     <label>Stok:</label>
