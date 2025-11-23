@@ -53,6 +53,7 @@ $result = mysqli_query($conn, $sql);
     <th>Penulis</th>
     <th>Year</th>
     <th>Image</th>
+    <th>Category</th>
     <th>Stok</th>
     <th>Description</th>
     <th>Harga</th>
@@ -68,6 +69,7 @@ $result = mysqli_query($conn, $sql);
     <td><?php echo $row['penulis']; ?></td>
     <td><?php echo $row['tahun']; ?></td>
     <td><img src='../uploads/<?php echo $row['image']; ?>' width='80'></td>
+    <td><?php echo $row['category']; ?></td>
     <td><?php echo $row['stok']; ?></td>
     <td><?php echo $row['description']; ?></td>
     <td><?php echo $row['harga']; ?></td>
