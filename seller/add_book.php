@@ -62,7 +62,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // add book
     $sql = "INSERT INTO bst_books(ISBN, judul, penulis, tahun, image, category,  stok, description, harga, seller_id, pdf_file)
-    VALUES('$isbn', '$judul', '$penulis', '$tahun', '$image', '$stok', '$category', '$description', '$harga', '$seller_id', '$pdf_file')";
+    VALUES('$isbn', '$judul', '$penulis', '$tahun', '$image','$category', '$stok',  '$description', '$harga', '$seller_id', '$pdf_file')";
 
     
     if ($conn->query($sql) === TRUE) {
