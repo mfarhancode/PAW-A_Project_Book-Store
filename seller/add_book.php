@@ -61,8 +61,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $seller_id = $_SESSION['id'];
 
     // add book
-    $sql = "INSERT INTO bst_books(ISBN, judul, penulis, tahun, image, stok, description, harga, seller_id, pdf_file)
-    VALUES('$isbn', '$judul', '$penulis', '$tahun', '$image', '$stok', '$description', '$harga', '$seller_id', '$pdf_file')";
+    $sql = "INSERT INTO bst_books(ISBN, judul, penulis, tahun, image, category,  stok, description, harga, seller_id, pdf_file)
+    VALUES('$isbn', '$judul', '$penulis', '$tahun', '$image', '$stok', '$category', '$description', '$harga', '$seller_id', '$pdf_file')";
 
     
     if ($conn->query($sql) === TRUE) {
