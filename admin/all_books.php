@@ -227,6 +227,9 @@ footer {
     </div>
     <div class="navbar">
         <a href="admin_dashboard.php">Dashboard</a><br>
+        <a href="users_data.php">Manage Users</a><br>
+        <a href="#">All Book</a><br>
+        <a href="admin_report.php">Report</a><br>
     </div>
     <section id="content" class="content">
         <div class="sold-book">
