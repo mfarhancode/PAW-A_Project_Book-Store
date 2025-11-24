@@ -127,9 +127,9 @@ $result = mysqli_query($conn, $query);
         <div class="sidebar">
             <h2>Admin</h2>
             <ul class="menu">
-                <li><a href="#">Dashboard</a></li>
+                <li><a href="admin_dashboard.php">Dashboard</a></li>
                 <li><a href="users_data.php">Manage users</a></li>
-                <li><a href="#">All Books</a></li>
+                <li><a href="all_books.php">All Books</a></li>
                 <li><a href="report.php">Report</a></li>
             </ul>
         </div>

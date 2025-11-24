@@ -136,9 +136,9 @@ $total_books  = 68;
         <div class="sidebar">
             <h2>Admin</h2>
             <ul class="menu">
-                <li><a href="dashboard.php" style="font-weight:bold;">Dashboard</a></li>
+                <li><a href="admin_dashboard.php" style="font-weight:bold;">Dashboard</a></li>
                 <li><a href="users_data.php">Manager User</a></li>
-                <li><a href="books.php">All Book</a></li>
+                <li><a href="all_books.php">All Book</a></li>
                 <li><a href="report.php">Report</a></li>
             </ul>
         </div>
