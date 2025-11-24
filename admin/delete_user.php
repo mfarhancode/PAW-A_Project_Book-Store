@@ -1,7 +1,11 @@
 <?php
 
-require "connection.php";
-
+require "../connection.php";
+session_start();
+if (!($_SESSION['login'])) {
+    header("Location: ../login.php");
+    exit;
+}
 
 if (isset($_GET['id'])) {
     $id = $_GET['id'];

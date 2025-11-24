@@ -1,10 +1,10 @@
 <?php 
-require "connection.php";
-// session_start();
-// if (!($_SESSION['login'])) {
-//     header("Location: ../login.php");
-//     exit;
-// }
+require "../connection.php";
+session_start();
+if (!($_SESSION['login'])) {
+    header("Location: ../login.php");
+    exit;
+}
 // Set Default Tanggal jika kosong (Hari ini s/d Hari ini)
 $tgl_awal = isset($_GET['tgl_awal']) ? $_GET['tgl_awal'] : date('Y-m-01');
 $tgl_akhir = isset($_GET['tgl_akhir']) ? $_GET['tgl_akhir'] : date('Y-m-d');

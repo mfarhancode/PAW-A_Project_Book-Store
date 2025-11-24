@@ -1,5 +1,11 @@
 <?php
-require "connection.php";
+require "../connection.php";
+session_start();
+if (!($_SESSION['login'])) {
+    header("Location: ../login.php");
+    exit;
+}
+
 
 $id = "";
 $nama = "";
@@ -21,15 +27,15 @@ if (isset($_POST['update'])) {
     $id_db = (int)$id;
 
 
-    $sql = "UPDATE suppliers SET 
-            nama = '$nama_db', 
+    $sql = "UPDATE bst_user SET 
+            name = '$nama_db', 
             username = '$username_db', 
             level = '$level_db' 
             WHERE id = $id_db";
 
     if (mysqli_query($conn, $sql)) {
     
-        header("Location: index.php");
+        header("Location: users_data.php");
         exit;
     } else {
         $error_message = "Error: Gagal mengupdate data. " . mysqli_error($conn);
@@ -39,7 +45,7 @@ if (isset($_POST['update'])) {
 if (isset($_GET['id'])) {
     $id = mysqli_real_escape_string($conn, $_GET['id']);
 
-    $sql = "SELECT * FROM suppliers WHERE id = '$id' ";
+    $sql = "SELECT * FROM bst_user WHERE id = '$id' ";
     $result = mysqli_query($conn, $sql);
 
     if (mysqli_num_rows($result) > 0) {
@@ -48,10 +54,10 @@ if (isset($_GET['id'])) {
         $username = $row['username'];
         $level = $row['level'];
     } else {
-        $error_message = "Data supplier tidak ditemukan.";
+        $error_message = "Data user tidak ditemukan.";
     }
 } else if (!isset($_POST['update'])) {
-    header("Location: index.php");
+    header("Location: users_data.php");
     exit;
 }
 ?>

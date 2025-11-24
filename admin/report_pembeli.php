@@ -1,54 +1,63 @@
 <?php 
-require "connection.php";
+require "../connection.php";
 session_start();
-if (!($_SESSION['login'])) {
+
+if (!isset($_SESSION['login'])) {
     header("Location: ../login.php");
     exit;
 }
-$tgl_awal = isset($_GET['tgl_awal']) ? $_GET['tgl_awal'] : '';
-$tgl_akhir = isset($_GET['tgl_akhir']) ? $_GET['tgl_akhir'] : '';
 
+$tgl_awal = isset($_GET['tgl_awal']) ? $_GET['tgl_awal'] : date('Y-m-01');
+$tgl_akhir = isset($_GET['tgl_akhir']) ? $_GET['tgl_akhir'] : date('Y-m-d');
+
+// --- QUERY UTAMA ---
+// Mencari Buyer -> Join ke Pembayaran -> Join ke Buku Terjual
 $query = "
     SELECT 
-        DATE(pay.timestamp) as tanggal_harian, 
-        SUM(sold.price_at_sale) as total_pendapatan
+        u.name as nama_pembeli, 
+        SUM(sold.qty) as total_buku_dibeli,
+        SUM(sold.price_at_sale) as total_uang_dikeluarkan
     FROM 
-        bst_payment_detail as pay 
+        bst_user u
     JOIN 
-        bst_sold_books as sold ON pay.payment_id = sold.id
+        bst_payment_detail pay ON u.id = pay.user_id  -- ASUMSI: pay punya kolom user_id
+    JOIN 
+        bst_sold_books sold ON pay.payment_id = sold.payment_id
     WHERE
-        DATE(pay.timestamp) BETWEEN '$tgl_awal' AND '$tgl_akhir'
+        u.level = 'buyer'
+        AND DATE(pay.timestamp) BETWEEN '$tgl_awal' AND '$tgl_akhir'
     GROUP BY 
-        tanggal_harian
-    ORDER BY
-        tanggal_harian ASC
+        u.id
+    ORDER BY 
+        total_buku_dibeli DESC
+    LIMIT 10 -- Ambil Top 10 Pembeli saja agar grafik rapi
 ";
-$execute = mysqli_query($conn, $query);
-$rekap_harian = mysqli_fetch_all($execute, MYSQLI_ASSOC);
 
-$tanggal = [];
-$total_harga = [];
-foreach($rekap_harian as $value){
-    $tanggal[] = $value['tanggal_harian'];
-    $total_harga[] = $value['total_pendapatan'];
+$execute = mysqli_query($conn, $query);
+
+// Cek error query untuk debugging
+if(!$execute) {
+    die("Error Query: " . mysqli_error($conn));
 }
 
-$query_total = "
-    SELECT 
-        COUNT(DISTINCT pay.payment_id) as total_pelanggan, 
-        SUM(sold.price_at_sale) as total_pendapatan_kumulatif
-    FROM 
-        bst_payment_detail as pay 
-    JOIN 
-        bst_sold_books as sold ON pay.payment_id = sold.id
-    WHERE
-        DATE(pay.timestamp) BETWEEN '$tgl_awal' AND '$tgl_akhir'
-";
-$execute_total = mysqli_query($conn, $query_total);
-$total_data = mysqli_fetch_assoc($execute_total);
+$rekap_buyer = mysqli_fetch_all($execute, MYSQLI_ASSOC);
 
-$total_pelanggan = $total_data['total_pelanggan'];
-$total_pendapatan_rp = number_format($total_data['total_pendapatan_kumulatif'], 0, ',', '.');
+// Persiapan Data Chart
+$nama_pembeli = [];
+$total_qty = [];
+
+foreach($rekap_buyer as $value){
+    $nama_pembeli[] = $value['nama_pembeli'];
+    $total_qty[] = $value['total_buku_dibeli'];
+}
+
+// Menghitung Total Keseluruhan untuk Kotak Bawah
+$total_buku_all = 0;
+$total_uang_all = 0;
+foreach($rekap_buyer as $val) {
+    $total_buku_all += $val['total_buku_dibeli'];
+    $total_uang_all += $val['total_uang_dikeluarkan'];
+}
 ?>
 
 <!DOCTYPE html>
@@ -56,7 +65,7 @@ $total_pendapatan_rp = number_format($total_data['total_pendapatan_kumulatif'], 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan Pembelian</title>
+    <title>Laporan Top Pembeli</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -64,6 +73,7 @@ $total_pendapatan_rp = number_format($total_data['total_pendapatan_kumulatif'], 
         .container { max-width: 900px; margin: 20px auto; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        
         .header-top {
             display: flex;
             align-items: center;
@@ -86,30 +96,29 @@ $total_pendapatan_rp = number_format($total_data['total_pendapatan_kumulatif'], 
             margin-right: 8px;
         }
         
-    
-        .header-top h2 {
-            margin: 0; 
-        }
+        .header-top h2 { margin: 0; }
 
         .total-box { display: flex; justify-content: space-around; padding: 15px; background-color: #e6f7ff; border: 1px solid #b3e0ff; margin-top: 20px; }
         .filter-form { margin-bottom: 20px; padding: 10px; border: 1px solid #ccc; }
         .no-print { margin-bottom: 10px; }
+        
         @media print{
-            .no-print, .filter-form {
-                display: none;
-            }
+            .no-print, .filter-form { display: none; }
         }
     </style>
 </head>
 <body>
 <div class="container">
+    
+    <!-- HEADER -->
     <div class="header-top">
-        <a href="report.php" class="btn-back">
+        <a href="dashboard.php" class="btn-back">
             <i class="fas fa-arrow-left icon-arrow"></i> BACK
         </a>
-        <h2>Rekap Laporan Pembelian</h2>
+        <h2>Laporan Top Pembeli (Buyer)</h2>
     </div>
 
+    <!-- FILTER TANGGAL -->
     <div class="filter-form no-print">
         <form method="GET" action="">
             <label for="tgl_awal">Dari Tanggal:</label>
@@ -122,63 +131,89 @@ $total_pendapatan_rp = number_format($total_data['total_pendapatan_kumulatif'], 
 
     <div class="no-print">
         <button onclick="window.print()" class="no-print">Cetak (Print)</button>
-        <button onclick="window.location='export_excel.php?tgl_awal=<?= $tgl_awal ?>&tgl_akhir=<?= $tgl_akhir ?>'">Export ke Excel</button>
+        <!-- Sesuaikan link export jika mau pakai -->
+        <!-- <button onclick="window.location='export_excel.php?tgl_awal=<?= $tgl_awal ?>&tgl_akhir=<?= $tgl_akhir ?>'">Export ke Excel</button> -->
     </div>
 
-    <h3>Grafik Pembelian</h3>
-    <canvas id="my_canvas" style="height: 300px;"></canvas>
+    <!-- GRAFIK -->
+    <h3>Grafik Pembeli Teraktif (Jumlah Buku)</h3>
+    <canvas id="buyerCanvas" style="height: 300px;"></canvas>
     <hr>
 
-    <h3>Rekap Detail (<?= $tgl_awal ?> s.d <?= $tgl_akhir ?>)</h3>
+    <!-- TABEL -->
+    <h3>Detail Data (<?= $tgl_awal ?> s.d <?= $tgl_akhir ?>)</h3>
     <table>
         <thead>
             <tr>
                 <th>No</th>
-                <th>Tanggal</th>
-                <th>Total Pendapatan</th>
+                <th>Nama Pembeli</th>
+                <th>Jumlah Buku Dibeli</th>
+                <th>Total Belanja (RP)</th>
             </tr>
         </thead>
         <tbody>
-            <?php $no = 1; ?>
-            <?php foreach($rekap_harian as $value): ?>
+            <?php 
+            $no = 1;
+            if(!empty($rekap_buyer)):
+                foreach($rekap_buyer as $value): 
+            ?>
             <tr>
                 <td><?= $no++ ?></td>
-                <td><?= date('d M Y', strtotime($value['tanggal_harian'])) ?></td>
-                <td>RP. <?= number_format($value['total_pendapatan'], 0, ',', '.') ?></td>
+                <td><?= htmlspecialchars($value['nama_pembeli']) ?></td>
+                <td><?= $value['total_buku_dibeli'] ?> Pcs</td>
+                <td>RP. <?= number_format($value['total_uang_dikeluarkan'], 0, ',', '.') ?></td>
             </tr>
-            <?php endforeach; ?>
+            <?php 
+                endforeach; 
+            else:
+            ?>
+            <tr><td colspan="4" align="center">Belum ada data pembelian pada periode ini.</td></tr>
+            <?php endif; ?>
         </tbody>
     </table>
     <hr>
 
-    <h3>Total Kumulatif</h3>
+    <!-- TOTAL BOX -->
+    <h3>Total Ringkasan (Top 10)</h3>
     <div class="total-box">
-        <div>Jumlah Pelanggan: **<?= $total_pelanggan ?> Orang**</div>
-        <div>Jumlah Pendapatan: **RP. <?= $total_pendapatan_rp ?>**</div>
+        <div>Total Buku Terjual: <b><?= $total_buku_all ?> Pcs</b></div>
+        <div>Total Omzet Pembeli Ini: <b>RP. <?= number_format($total_uang_all, 0, ',', '.') ?></b></div>
     </div>
 </div>
 
 <script>
-
-    const ctx = document.getElementById('my_canvas');
+    const ctx = document.getElementById('buyerCanvas');
+    
     new Chart(ctx, {
         type: 'bar',
         data: {
-        labels: <?= json_encode($tanggal)  ?>,
-        datasets: [{
-            label: 'Total Pendapatan Harian (RP)',
-            data: <?= json_encode($total_harga)  ?>,
-            backgroundColor: 'rgba(54, 162, 235, 0.5)',
-            borderColor: 'rgba(54, 162, 235, 1)',
-            borderWidth: 1
-        }]
+            labels: <?= json_encode($nama_pembeli) ?>, // SUMBU X: Nama Pembeli
+            datasets: [{
+                label: 'Jumlah Buku Dibeli (Pcs)',
+                data: <?= json_encode($total_qty) ?>, // SUMBU Y: Qty
+                backgroundColor: 'rgba(153, 102, 255, 0.6)', // Warna Ungu (Beda dari seller)
+                borderColor: 'rgba(153, 102, 255, 1)',
+                borderWidth: 1,
+                borderRadius: 4
+            }]
         },
         options: {
-        scales: {
-            y: {
-            beginAtZero: true
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Jumlah Buku (Unit)'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Nama Buyer'
+                    }
+                }
             }
-        }
         }
     });
 </script>

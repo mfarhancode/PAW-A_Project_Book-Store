@@ -1,5 +1,5 @@
 <?php
-require "connection.php";
+require "../connection.php";
 session_start();
 if (!($_SESSION['login'])) {
     header("Location: ../login.php");
@@ -162,7 +162,6 @@ $result = mysqli_query($conn, $query);
                             <div><?php echo $row['level']; ?></div>
                             
                             <div style="text-align: center;">
-                                <button class="btn" onclick="location.href='edit.php?id=<?php echo $row['id']; ?>'">edit</button>
                                 <button class="btn" onclick="konfirmasiHapus(<?php echo $row['id']; ?>)">delete</button>
                             </div>
                         </div>
