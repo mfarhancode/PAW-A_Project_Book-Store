@@ -136,9 +136,9 @@ $total_pendapatan  = 68;
         <div class="sidebar">
             <h2>Report</h2>
             <ul class="menu">
-                <li><a href="dashboard.php" style="font-weight:bold;">Dashboard</a></li>
-                <li><a href="books.php">See all your books</a></li>
-                <li><a href="report.php">Add book</a></li>
+                <li><a href="seller_dashboard.php" style="font-weight:bold;">Dashboard</a></li>
+                <li><a href="seller_books.php">See all your books</a></li>
+                <li><a href="add_book.php">Add book</a></li>
                 <li><a href="report.php">Report</a></li>
             </ul>
         </div>

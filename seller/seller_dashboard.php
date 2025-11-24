@@ -10,6 +10,8 @@ $name =  $_SESSION['name'];
 echo "<h2>Welcome $name!</h2>";
 echo "<hr>";
 
+echo "<a href='report.php'>Report</a>";
+echo "<br><br>";
 echo "<a href='seller_books.php'>See all your books</a>";
 echo "<br><br>";
 echo "<a href='add_book.php'>Add books</a>";
