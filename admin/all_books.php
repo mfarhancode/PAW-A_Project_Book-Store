@@ -9,11 +9,11 @@ require "../connection.php";
 
 
 $name =  $_SESSION['name'];
-echo "<h2>Welcome $name!</h2>";
+// echo "<h2>Welcome $name!</h2>";
 
 echo "<hr>";
 
-echo "<h3>List of all the books.</h3>";
+// echo "<h3>List of all the books.</h3>";
 
 
 $search = isset($_GET['search']) ? $_GET['search'] : '';
@@ -45,242 +45,212 @@ $result = mysqli_query($conn, $sql);
     <style>
         /* RESET */
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: "Segoe UI", sans-serif;
-}
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-body {
-    background: #f4f6fa;
-    color: #333;
-}
+        body {
+            background-color: #bde0fe;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-/* HEADER */
-.header {
-    background: #4a4aee;
-    padding: 25px;
-    text-align: center;
-    color: white;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-}
+        .dashboard-container {
+            width: 90%;
+            max-width: 1000px;
+            height: 80vh;
+            background-color: #f8f9fe;
+            display: flex;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            overflow: hidden;
+        }
 
-.header h1 {
-    font-size: 32px;
-    font-weight: 700;
-}
+        
+        .sidebar {
+            width: 250px;
+            background-color: #f8f9fe;
+            padding: 30px;
+            border-right: 1px solid #e0e0e0;
+        }
+        .sidebar h2 { font-size: 24px; color: #333; margin-bottom: 20px; }
+        .menu { list-style: none; }
+        .menu li { margin-bottom: 15px; }
+        .menu a { text-decoration: none; color: #333; display: block; transition: 0.3s; }
+        .menu a:hover { color: #5351e0; font-weight: bold; }
 
-.header h2 {
-    font-size: 20px;
-    margin-top: 6px;
-    opacity: .9;
-}
+        
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+        .main-content h2 { margin-bottom: 20px; font-weight: bold; }
+        /* CARD AREA */
+        .sold-book {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
 
-/* SIDEBAR */
-.navbar {
-    width: 220px;
-    background: #ffffff;
-    padding: 25px;
-    border-right: 1px solid #ddd;
-    height: calc(100vh - 100px);
-    position: fixed;
-    top: 100px;
-    left: 0;
-    overflow-y: auto;
-}
+        .sold-book h3 {
+            font-size: 22px;
+            margin-bottom: 15px;
+            color: #4a4aee;
+        }
 
-.navbar a {
-    display: block;
-    margin-bottom: 18px;
-    text-decoration: none;
-    color: #333;
-    padding: 10px 14px;
-    border-radius: 8px;
-    font-weight: 600;
-    transition: .25s;
-}
+        /* SEARCH */
+        .sold-book input[type='text'] {
+            padding: 10px;
+            width: 260px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
 
-.navbar a:hover {
-    background: #4a4aee;
-    color: white;
-}
+        .sold-book button {
+            padding: 10px 14px;
+            margin-left: 6px;
+            background: #4a4aee;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+        }
 
-/* CONTENT */
-.content {
-    margin-left: 250px;
-    padding: 30px;
-}
+        .sold-book button:hover {
+            background: #3b3bd1;
+        }
 
-/* CARD AREA */
-.sold-book {
-    background: white;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
+        /* TABLE */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 18px;
+        }
 
-.sold-book h3 {
-    font-size: 22px;
-    margin-bottom: 15px;
-    color: #4a4aee;
-}
+        table th {
+            background: #4a4aee;
+            color: white;
+            padding: 10px;
+            text-align: left;
+        }
 
-/* SEARCH */
-.sold-book input[type='text'] {
-    padding: 10px;
-    width: 260px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-}
+        table td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
 
-.sold-book button {
-    padding: 10px 14px;
-    margin-left: 6px;
-    background: #4a4aee;
-    border: none;
-    border-radius: 6px;
-    color: white;
-    cursor: pointer;
-}
+        table tr:hover {
+            background: #f1f1ff;
+        }
 
-.sold-book button:hover {
-    background: #3b3bd1;
-}
+        /* IMAGE */
+        table img {
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
 
-/* TABLE */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 18px;
-}
+        /* PAGINATION */
+        .pagination {
+            margin-top: 15px;
+        }
 
-table th {
-    background: #4a4aee;
-    color: white;
-    padding: 10px;
-    text-align: left;
-}
+        .pagination a {
+            padding: 8px 12px;
+            background: #eee;
+            margin-right: 5px;
+            border-radius: 6px;
+            text-decoration: none;
+            color: #333;
+            font-weight: 600;
+        }
 
-table td {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-}
+        .pagination a:hover {
+            background: #4a4aee;
+            color: #fff;
+        }
 
-table tr:hover {
-    background: #f1f1ff;
-}
+        /* LOGOUT */
+        a[href*='logout'] {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 14px;
+            background: #e63946;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+        }
 
-/* IMAGE */
-table img {
-    border-radius: 6px;
-    border: 1px solid #ccc;
-}
-
-/* PAGINATION */
-.pagination {
-    margin-top: 15px;
-}
-
-.pagination a {
-    padding: 8px 12px;
-    background: #eee;
-    margin-right: 5px;
-    border-radius: 6px;
-    text-decoration: none;
-    color: #333;
-    font-weight: 600;
-}
-
-.pagination a:hover {
-    background: #4a4aee;
-    color: #fff;
-}
-
-/* LOGOUT */
-a[href*='logout'] {
-    display: inline-block;
-    margin-top: 20px;
-    padding: 10px 14px;
-    background: #e63946;
-    color: white;
-    text-decoration: none;
-    border-radius: 6px;
-    font-weight: bold;
-}
-
-a[href*='logout']:hover {
-    background: #c72d3a;
-}
-
-/* FOOTER */
-footer {
-    text-align: center;
-    margin-top: 30px;
-    color: #777;
-}
+        a[href*='logout']:hover {
+            background: #c72d3a;
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Admin</h1>
-        <h2>ALL BOOK DATA</h2>
-    </div>
-    <div class="navbar">
-        <a href="admin_dashboard.php">Dashboard</a><br>
-        <a href="users_data.php">Manage Users</a><br>
-        <a href="#">All Book</a><br>
-        <a href="admin_report.php">Report</a><br>
-    </div>
-    <section id="content" class="content">
-        <div class="sold-book">
+    <div class="dashboard-container">
+        <div class="Sidebar">
+            <h2>Admin</h2>
+            <ul class="menu">
+                <a href="admin_dashboard.php">Dashboard</a><br>
+                <a href="users_data.php">Manage Users</a><br>
+                <a href="#">All Book</a><br>
+                <a href="admin_report.php">Report</a><br>
+            </ul>
+        </div>
+        <div class="main-content">
+            <h2>All Book</h2>
+           <div class="sold-book">
             <h3>Daftar Buku</h3>
             <form method='GET'>
-        <input type='text' name='search' placeholder='Search by title...' value='<?php echo $search; ?>'>
-        <button type='submit'>Search</button>
-        </form>
+            <input type='text' name='search' placeholder='Search by title...' value='<?php echo $search; ?>'>
+            <button type='submit'>Search</button>
+            </form>
 
 
-        <table border='1' cellpadding='5'>
-        <tr>
-            <th>No</th>
-            <th>ID</th>
-            <th>ISBN</th>
-            <th>Judul</th>
-            <th>Penulis</th>
-            <th>Year</th>
-            <th>Image</th>
-            <th>Stok</th>
-            <th>Harga</th>
-        </tr>
+            <table border='1' cellpadding='5'>
+            <tr>
+                <th>No</th>
+                <th>ID</th>
+                <th>ISBN</th>
+                <th>Judul</th>
+                <th>Penulis</th>
+                <th>Year</th>
+                <th>Image</th>
+                <th>Stok</th>
+                <th>Harga</th>
+            </tr>
 
-        <?php $n = $start + 1; ?>
-        <?php while ($row = mysqli_fetch_assoc($result)) { ?>
-        <tr>
-            <td><?php echo $n++;?></td>
-            <td><?php echo $row['id']; ?></td>
-            <td><?php echo $row['ISBN']; ?></td>
-            <td><?php echo $row['judul']; ?></td>
-            <td><?php echo $row['penulis']; ?></td>
-            <td><?php echo $row['tahun']; ?></td>
-            <td><img src='../uploads/<?php echo $row['image']; ?>' width='80'></td>
-            <td><?php echo $row['stok']; ?></td>
-            <td><?php echo $row['harga']; ?></td>
-        </tr>
-        <?php } ?>
-        </table>
+            <?php $n = $start + 1; ?>
+            <?php while ($row = mysqli_fetch_assoc($result)) { ?>
+            <tr>
+                <td><?php echo $n++;?></td>
+                <td><?php echo $row['id']; ?></td>
+                <td><?php echo $row['ISBN']; ?></td>
+                <td><?php echo $row['judul']; ?></td>
+                <td><?php echo $row['penulis']; ?></td>
+                <td><?php echo $row['tahun']; ?></td>
+                <td><img src='../uploads/<?php echo $row['image']; ?>' width='80'></td>
+                <td><?php echo $row['stok']; ?></td>
+                <td><?php echo $row['harga']; ?></td>
+            </tr>
+            <?php } ?>
+            </table>
 
-        <?php for ($i = 1; $i <= $pages; $i++) { ?>
-        <a href='?page=<?php echo $i; ?>&search=<?php echo $search; ?>'><?php echo $i; ?></a>
-        <?php } ?>
+            <?php for ($i = 1; $i <= $pages; $i++) { ?>
+            <a href='?page=<?php echo $i; ?>&search=<?php echo $search; ?>'><?php echo $i; ?></a>
+            <?php } ?>
 
 
-        <hr>
-        <a href='../logout.php'>Logout</a>
+            <hr>
+            <a href='../logout.php'>Logout</a>
+            </div>
         </div>
-
-    </section>
-    <footer>
-        <p>&copy;</p>
-    </footer>
+    </div>
 </body>
 </html>
