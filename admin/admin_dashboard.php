@@ -166,7 +166,10 @@ footer {
         <h2>DASHBOARD</h2>
     </div>
     <div class="navbar">
+        <a href="#">Dashboard</a><br>
+        <a href="users_data.php">Manage Users</a><br>
         <a href="all_books.php">All Book</a><br>
+        <a href="admin_report.php">Report</a><br>
     </div>
     <section id="content" class="content">
         <div class="user">
