@@ -67,21 +67,30 @@ $pdf_file = $_POST['pdf_file'];
             
     $seller_id = $_SESSION['id'];
 
-    // add book
-    // $sql = "UPDATE bst_books SET
-    
-    // ";
 
-    
-    // if ($conn->query($sql) === TRUE) {
-    //     // if query is excuted, redirect user to dashboard page
-    //     echo '<script>
-    //         alert("Book added successfully!\nRedirecting to dashboard")
-    //         window.location.href = "seller_dashboard.php";
-    //         </script>';
-    // } else {
-    //     echo "Error: " . $conn->error;
-    // }
+
+
+$sql = "UPDATE bst_books SET 
+    ISBN='$isbn',
+    judul='$judul',
+    penulis='$penulis',
+    tahun='$tahun',
+    category='$category',
+    stok='$stok',
+    harga='$harga',
+    description='$description',
+    pdf_file='$pdf_file',
+    image='$image'
+ WHERE id=$id AND seller_id=$seller_id";
+
+if ($conn->query($sql) === TRUE) {
+    echo '<script>
+        alert("Book updated successfully! Redirecting...");
+        window.location.href = "seller_dashboard.php";
+        </script>';
+} else {
+    echo "Error: " . $conn->error;
+}
         }
 
 }
@@ -142,7 +151,7 @@ $pdf_file = $_POST['pdf_file'];
     <input type="file" name="image"><br><br>
     <br>
 
-    <input type="submit" value="Add">
+    <input type="submit" value="Edit">
     <a href="seller_dashboard.php"><button type="button">Cancel</button></a>
 
 
