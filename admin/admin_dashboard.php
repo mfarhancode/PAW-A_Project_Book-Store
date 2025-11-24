@@ -5,9 +5,9 @@ if (!($_SESSION['login']) || $_SESSION['level'] != 'admin') {
     exit;
 }
 
-echo "<h1>Admin Page<h1>";
+// echo "<h1>Admin Page<h1>";
 $name =  $_SESSION['name'];
-echo "<h2>Welcome $name!</h2>";
+// echo "<h2>Welcome $name!</h2>";
 
 require "../connection.php";
 
@@ -26,175 +26,182 @@ $salesCount = $qSales->fetch_assoc()['total'];
 // Total report (jumlah transaksi)
 $qReport = $conn->query("SELECT COUNT(*) AS total FROM bst_payment_detail");
 $reportCount = $qReport->fetch_assoc()['total'];
-
 ?>
 
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
     <style>
-        /* RESET */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: "Segoe UI", sans-serif;
-}
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-body {
-    background: #f0f2f5;
-    color: #333;
-}
+        body {
+            background-color: #bde0fe;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-/* HEADER */
-.header {
-    background: #4a4aee;
-    padding: 20px;
-    text-align: center;
-    color: white;
-}
+        .dashboard-container {
+            width: 90%;
+            max-width: 1000px;
+            height: 80vh;
+            background-color: #f8f9fe;
+            display: flex;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
 
-.header h1 {
-    font-size: 32px;
-    font-weight: bold;
-}
+        /* SIDEBAR */
+        .sidebar {
+            width: 250px;
+            background-color: #f8f9fe;
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+        }
 
-.header h2 {
-    font-size: 20px;
-    margin-top: 6px;
-}
+        .sidebar h2 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #dcdcdc;
+        }
 
-/* NAVBAR */
-.navbar {
-    width: 200px;
-    background: #ffffff;
-    padding: 20px;
-    border-right: 1px solid #ddd;
-    height: 100vh;
-    position: fixed;
-    top: 0;
-    left: 0;
-    margin-top: 100px;
-}
+        .menu { list-style: none; margin-top: 20px; }
+        .menu li { margin-bottom: 20px; }
+        .menu a {
+            text-decoration: none;
+            color: #333;
+            font-size: 16px;
+            display: block;
+            transition: 0.3s;
+        }
+        .menu a:hover { color: #5351e0; font-weight: bold; }
 
-.navbar a {
-    display: block;
-    margin-bottom: 15px;
-    text-decoration: none;
-    color: #333;
-    font-weight: 600;
-    padding: 8px 10px;
-    border-radius: 6px;
-    transition: 0.3s;
-}
+        /* MAIN CONTENT */
+        .main-content {
+            flex: 1;
+            padding: 50px;
+            background-color: #f8f9fe;
+        }
 
-.navbar a:hover {
-    background: #4a4aee;
-    color: #fff;
-}
+        .main-content h2 {
+            margin-bottom: 40px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 22px;
+            letter-spacing: 1px;
+        }
 
-/* CONTENT */
-.content {
-    margin-left: 240px;
-    padding: 30px;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 20px;
-}
+        /* STYLING KARTU */
+        .cards-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 60px 100px;
+        }
 
-/* CARD STYLE */
-.content div {
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-    text-align: center;
-    transition: 0.3s ease;
-}
+        .card {
+            background-color: #6ca0f5;
+            width: 220px;
+            height: 120px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            
+            /* PENTING: Agar kursor berubah jadi tangan */
+            cursor: pointer; 
+        }
 
-.content div:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.20);
-}
+        /* Efek Hover agar user tahu ini bisa diklik */
+        .card:hover {
+            transform: translateY(-5px); /* Naik sedikit */
+            background-color: #5b8de0;   /* Warna sedikit lebih gelap */
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+        }
+        
+        /* Efek saat diklik */
+        .card:active {
+            transform: scale(0.98); /* Sedikit mengecil saat ditekan */
+        }
 
-.content h3 {
-    font-size: 18px;
-    color: #555;
-    margin-bottom: 8px;
-}
+        .card-title { font-size: 18px; margin-bottom: 5px; font-weight: 500; }
+        .card-value { font-size: 22px; font-weight: 400; }
+          /* LOGOUT */
+        a[href*='logout'] {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 14px;
+            background: #e63946;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+        }
 
-.content p {
-    font-size: 30px;
-    font-weight: bold;
-    color: #4a4aee;
-}
+        a[href*='logout']:hover {
+            background: #c72d3a;
+        }
 
-/* LOGOUT BUTTON */
-a[href*='logout'] {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    padding: 12px 18px;
-    background: #e63946;
-    color: white;
-    text-decoration: none;
-    border-radius: 8px;
-    font-weight: bold;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    transition: 0.3s;
-}
-
-a[href*='logout']:hover {
-    background: #c92b37;
-}
-
-/* FOOTER */
-footer {
-    text-align: center;
-    padding: 15px;
-    color: #666;
-    margin-top: 40px;
-}
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Admin</h1>
-        <h2>DASHBOARD</h2>
+
+    <div class="dashboard-container">
+        
+        <div class="sidebar">
+            <h2>Admin</h2>
+            <ul class="menu">
+                <li><a href="admin_dashboard.php" style="font-weight:bold;">Dashboard</a></li>
+                <li><a href="users_data.php">Manager User</a></li>
+                <li><a href="all_books.php">All Book</a></li>
+                <li><a href="admin_report.php">Report</a></li>
+            </ul>
+        </div>
+
+        <div class="main-content">
+            <h2>Dashboard</h2>
+
+            <div class="cards-wrapper">
+                
+                <div class="card" onclick="location.href='report_penjual.php'">
+                    <div class="card-title">User</div>
+                    <div class="card-value"><?php echo $userCount; ?></div>
+                </div>
+
+                <div class="card" onclick="location.href='report_pembeli.php'">
+                    <div class="card-title">Sales</div>
+                    <div class="card-value"><?php echo $salesCount; ?></div>
+                </div>
+
+                <div class="card" onclick="location.href='report_genre.php'">
+                    <div class="card-title">Report</div>
+                    <div class="card-value"><?php echo $reportCount; ?></div>
+                </div>
+
+                <div class="card" onclick="location.href='report_books.php'">
+                    <div class="card-title">Books</div>
+                    <div class="card-value"><?php echo $booksCount; ?></div>
+                </div>
+                <a href='../logout.php'>Logout</a>
+            </div>
+        </div>
+
     </div>
-    <div class="navbar">
-        <a href="#">Dashboard</a><br>
-        <a href="users_data.php">Manage Users</a><br>
-        <a href="all_books.php">All Book</a><br>
-        <a href="admin_report.php">Report</a><br>
-    </div>
-    <section id="content" class="content">
-        <div class="user">
-            <h3>User</h3>
-            <p><?= $userCount ?></p>
-        </div>
-
-        <div class="sales">
-            <h3>Sales</h3>
-            <p><?= $salesCount ?></p>
-        </div>
-
-        <div class="report">
-            <h3>Report</h3>
-            <p><?= $reportCount ?></p>
-        </div>
-
-        <div class="book">
-            <h3>Books</h3>
-            <p><?= $booksCount ?></p>
-        </div>
-    </section>
-    <?php echo "<a href='../logout.php'>Logout</a>";?>
-    <footer>
-        <p>&copy;</p>
-    </footer>
 </body>
 </html>
