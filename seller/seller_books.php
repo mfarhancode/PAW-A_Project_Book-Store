@@ -7,46 +7,56 @@ if (!($_SESSION['login']) || $_SESSION['level'] != 'seller') {
 
 require "../connection.php";
 
-
-$name =  $_SESSION['name'];
-echo "<h2>Welcome $name!</h2>";
-
-echo "<a href='seller_dashboard.php'>Dashboard</a>";
-
-
-echo "<hr>";
-
-echo "<h3>List of all your books.</h3>";
-
-
-$search = isset($_GET['search']) ? $_GET['search'] : '';
+$name = $_SESSION['name'];
+$seller_id = $_SESSION['id'];
+$search = $_GET['search'] ?? "";
 
 // Pagination setup
 $limit = 5;
-$page = isset($_GET['page']) ? $_GET['page'] : 1;
+$page = $_GET['page'] ?? 1;
 $start = ($page - 1) * $limit;
 
-// Count total records
-$seller_id = $_SESSION['id'];
-$countSql = "SELECT COUNT(*) AS total FROM bst_books WHERE judul LIKE '%$search%' AND seller_id = $seller_id";
+// Count total
+$countSql = "SELECT COUNT(*) AS total FROM bst_books 
+             WHERE seller_id = $seller_id 
+             AND archived = 0
+             AND judul LIKE '%$search%'";
 $countResult = mysqli_query($conn, $countSql);
 $countRow = mysqli_fetch_assoc($countResult);
 $total = $countRow['total'];
 $pages = ceil($total / $limit);
 
-// Fetch records
-$sql = "SELECT * FROM bst_books WHERE judul LIKE '%$search%' AND seller_id = $seller_id LIMIT $start, $limit";
+// Fetch active (not archived) books
+$sql = "SELECT * FROM bst_books 
+        WHERE seller_id = $seller_id 
+        AND archived = 0
+        AND judul LIKE '%$search%'
+        LIMIT $start, $limit";
 $result = mysqli_query($conn, $sql);
+
+include "../partials/header.php";
 ?>
 
-<form method='GET'>
-  <input type='text' name='search' placeholder='Search by title...' value='<?php echo $search; ?>'>
-  <button type='submit'>Search</button>
+<link rel="stylesheet" href="../assets/seller_books.css">
+
+<div class="container">
+
+<a class='link_button' href="seller_dashboard.php">Dashboard</a>
+<a class='link_button' href="add_book.php">Add Books</a>
+<a class='link_button' href="seller_archived_books.php">Archived Books</a>
+
+<hr>
+
+<h3>Your Books</h3>
+
+<form method="GET">
+    <input type="text" name="search" placeholder="Search..." value="<?= $search ?>">
+    <button>Search</button>
 </form>
 
-
-<table border='1' cellpadding='5'>
-  <tr>
+<table border="1" cellpadding="5">
+<tr>
+    <th>No</th>
     <th>ID</th>
     <th>ISBN</th>
     <th>Judul</th>
@@ -54,38 +64,58 @@ $result = mysqli_query($conn, $sql);
     <th>Year</th>
     <th>Image</th>
     <th>Category</th>
-    <th>Stok</th>
+    <th>Stock</th>
     <th>Description</th>
-    <th>Harga</th>
-    <th>PDF File</th>
-    <th>Action</th>
-  </tr>
+    <th>Price</th>
+    <th>PDF</th>
+    <th>Actions</th>
+</tr>
+<?php $n = $start + 1; ?>
 
-  <?php while ($row = mysqli_fetch_assoc($result)) { ?>
-  <tr>
-    <td><?php echo $row['id']; ?></td>
-    <td><?php echo $row['ISBN']; ?></td>
-    <td><?php echo $row['judul']; ?></td>
-    <td><?php echo $row['penulis']; ?></td>
-    <td><?php echo $row['tahun']; ?></td>
-    <td><img src='../uploads/<?php echo $row['image']; ?>' width='80'></td>
-    <td><?php echo $row['category']; ?></td>
-    <td><?php echo $row['stok']; ?></td>
-    <td><?php echo $row['description']; ?></td>
-    <td><?php echo $row['harga']; ?></td>
-    <td> <a href="<?php echo $row['pdf_file']; ?>" target="_blank">File link</a> </td>
+<?php while ($row = mysqli_fetch_assoc($result)) { 
+    $isbn = $row['ISBN'];
+
+    // check if book is sold
+    $check = mysqli_query($conn, "SELECT id FROM bst_sold_books WHERE ISBN='$isbn'");
+    $isSold = mysqli_num_rows($check) > 0;
+?>
+<tr>
+    <td><?php echo $n++;?></td>
+    <td><?= $row['id'] ?></td>
+    <td><?= $row['ISBN'] ?></td>
+    <td><?= $row['judul'] ?></td>
+    <td><?= $row['penulis'] ?></td>
+    <td><?= $row['tahun'] ?></td>
+    <td><img src="../uploads/<?= $row['image'] ?>" width="60"></td>
+    <td><?= $row['category'] ?></td>
+    <td><?= $row['stok'] ?></td>
+    <td><?= $row['description'] ?></td>
+    <td><?= $row['harga'] ?></td>
+    <td><a class="link_button" href="<?= $row['pdf_file'] ?>" target="_blank">File</a></td>
+
     <td>
-      <a href='edit_book.php?id=<?php echo $row['id']; ?>'>Edit</a> |
-      <a href='delete_book.php?id=<?php echo $row['id']; ?>' onclick="return confirm('Do you want to delete this data?');" >Delete</a>
+        <div class="action_box">
+            <a class="link_button" href='edit_book.php?id=<?= $row['id'] ?>'>Edit</a><br>
+
+            <?php if ($isSold): ?>
+                <span>Sold! Can't delete</span><br>
+                <a  class="link_button" href='toggle_archive.php?id=<?= $row['id'] ?>&action=archive'>Archive</a><br>
+            <?php else: ?>
+                <a class="link_button" href='delete_book.php?id=<?= $row['id'] ?>'
+                   onclick="return confirm('Delete this book?')">Delete</a><br>
+                <a class="link_button" href='toggle_archive.php?id=<?= $row['id'] ?>&action=archive'>Archive</a>
+            <?php endif; ?>
+        </div>
     </td>
-  </tr>
-  <?php } ?>
+</tr>
+<?php } ?>
 </table>
 
-<?php for ($i = 1; $i <= $pages; $i++) { ?>
-  <a href='?page=<?php echo $i; ?>&search=<?php echo $search; ?>'><?php echo $i; ?></a>
-<?php } ?>
+<?php for ($i = 1; $i <= $pages; $i++): ?>
+    <a class="link_button" href="?page=<?= $i ?>&search=<?= $search ?>"><?= $i ?></a>
+<?php endfor; ?>
 
+</div>
 
-<hr>
-<a href='../logout.php'>Logout</a>
+<br>
+<?php include "../partials/footer.php"; ?>
