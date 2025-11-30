@@ -1,15 +1,40 @@
 <?php
 require "../connection.php";
 session_start();
-if (!($_SESSION['login'])) {
+
+// Cek Login
+if (!isset($_SESSION['login'])) {
     header("Location: ../login.php");
     exit;
 }
 
-$total_user   = 14500;
-$total_sales  = 1200;
-$total_report = 435;
-$total_books  = 68;
+// --- LOGIKA MENGHITUNG DATA DARI DATABASE ---
+
+// 1. Hitung Penjual (Seller)
+// Mengambil semua user yang level-nya 'seller'
+$query_seller = mysqli_query($conn, "SELECT COUNT(*) as total FROM bst_user WHERE level = 'seller'");
+$data_seller  = mysqli_fetch_assoc($query_seller);
+$total_user   = $data_seller['total']; 
+
+// 2. Hitung Pembeli (Buyer)
+// Mengambil semua user yang level-nya 'buyer'
+// (Saya simpan ke variabel $total_sales sesuai variabel aslimu)
+$query_buyer  = mysqli_query($conn, "SELECT COUNT(*) as total FROM bst_user WHERE level = 'buyer'");
+$data_buyer   = mysqli_fetch_assoc($query_buyer);
+$total_sales  = $data_buyer['total'];
+
+// 3. Hitung Genre (Kategori)
+// Menggunakan DISTINCT agar nama kategori yang sama tidak dihitung dobel
+$query_genre  = mysqli_query($conn, "SELECT COUNT(DISTINCT category) as total FROM bst_books WHERE category IS NOT NULL AND category != ''");
+$data_genre   = mysqli_fetch_assoc($query_genre);
+$total_report = $data_genre['total']; // Variabel aslimu bernama total_report
+
+// 4. Hitung Total Buku (Books)
+// Menghitung seluruh baris di tabel buku
+$query_books  = mysqli_query($conn, "SELECT COUNT(*) as total FROM bst_books");
+$data_books   = mysqli_fetch_assoc($query_books);
+$total_books  = $data_books['total'];
+
 ?>
 
 <!DOCTYPE html>
@@ -107,21 +132,17 @@ $total_books  = 68;
             color: white;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             transition: all 0.3s;
-            
-            /* PENTING: Agar kursor berubah jadi tangan */
             cursor: pointer; 
         }
 
-        /* Efek Hover agar user tahu ini bisa diklik */
         .card:hover {
-            transform: translateY(-5px); /* Naik sedikit */
-            background-color: #5b8de0;   /* Warna sedikit lebih gelap */
+            transform: translateY(-5px);
+            background-color: #5b8de0;
             box-shadow: 0 8px 15px rgba(0,0,0,0.2);
         }
         
-        /* Efek saat diklik */
         .card:active {
-            transform: scale(0.98); /* Sedikit mengecil saat ditekan */
+            transform: scale(0.98);
         }
 
         .card-title { font-size: 18px; margin-bottom: 5px; font-weight: 500; }
@@ -136,39 +157,40 @@ $total_books  = 68;
         <div class="sidebar">
             <h2>Admin</h2>
             <ul class="menu">
-                <li><a href="admin_dashboard.php" style="font-weight:bold;">Dashboard</a></li>
+                <li><a href="admin_report.php" style="font-weight:bold;">Dashboard</a></li>
                 <li><a href="users_data.php">Manager User</a></li>
                 <li><a href="all_books.php">All Book</a></li>
-                <li><a href="admin_report.php">Report</a></li>
+                <li><a href="report_books.php">Report</a></li> 
             </ul>
         </div>
 
         <div class="main-content">
-            <h2>REPORT</h2>
+            <h2><?php include "../partials/header.php";?></h2>
 
             <div class="cards-wrapper">
                 
                 <div class="card" onclick="location.href='report_penjual.php'">
                     <div class="card-title">Penjual</div>
-                    <div class="card-value"><?php echo $total_user; ?></div>
+                    <div class="card-value"><?= number_format($total_user); ?></div>
                 </div>
 
                 <div class="card" onclick="location.href='report_pembeli.php'">
                     <div class="card-title">Pembeli</div>
-                    <div class="card-value"><?php echo $total_sales; ?></div>
+                    <div class="card-value"><?= number_format($total_sales); ?></div>
                 </div>
 
                 <div class="card" onclick="location.href='report_genre.php'">
                     <div class="card-title">Genre</div>
-                    <div class="card-value"><?php echo $total_report; ?></div>
+                    <div class="card-value"><?= number_format($total_report); ?></div>
                 </div>
 
                 <div class="card" onclick="location.href='report_books.php'">
                     <div class="card-title">Books</div>
-                    <div class="card-value"><?php echo $total_books; ?></div>
+                    <div class="card-value"><?= number_format($total_books); ?></div>
                 </div>
 
             </div>
+            <?php include "../partials/footer.php"; ?>
         </div>
 
     </div>
