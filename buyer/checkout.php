@@ -29,44 +29,82 @@ $items = [];
 $total = 0;
 
 while ($row = mysqli_fetch_assoc($res)) {
-    $sub = $row['qty'] * $row['harga'];
-    $items[] = $row;
-    $total += $sub;
-}
 
-if ($delivery_type == "digital") {
-    $total = floor($total * 0.10);
+    // normal subtotal
+    $normal = $row['qty'] * $row['harga'];
+
+    // digital subtotal (10%)
+    $digital = intval($row['harga'] * 0.10) * $row['qty'];
+
+    if ($delivery_type == "digital") {
+        $sub = $digital;
+    } else {
+        $sub = $normal;
+    }
+
+    $row['normal_sub']  = $normal;
+    $row['digital_sub'] = $digital;
+
+    $items[] = $row;
+    $total  += $sub;
 }
 ?>
+<link rel="stylesheet" href="../assets/checkout.css">
+
 <h2>Checkout</h2>
+
 <h3>Items</h3>
 <table border="1" cellpadding="5">
     <tr>
         <th>Title</th>
         <th>ISBN</th>
         <th>Qty</th>
-        <th>Price</th>
-        <th>Total</th>
+        <th>Unit Price</th>
+        <th>Subtotal</th>
     </tr>
+
     <?php foreach ($items as $i) { ?>
     <tr>
         <td><?php echo $i['judul']; ?></td>
         <td><?php echo $i['ISBN']; ?></td>
         <td><?php echo $i['qty']; ?></td>
-        <td><?php echo $i['harga']; ?></td>
-        <td><?php echo $i['qty'] * $i['harga']; ?></td>
+
+        <td>
+            <?php 
+            if ($delivery_type == "digital") {
+                echo intval($i['harga'] * 0.10);
+            } else {
+                echo $i['harga'];
+            }
+            ?>
+        </td>
+
+        <td>
+            <?php 
+            if ($delivery_type == "digital") {
+                echo $i['digital_sub'];
+            } else {
+                echo $i['normal_sub'];
+            }
+            ?>
+        </td>
     </tr>
     <?php } ?>
 </table>
+
 <h3>Delivery Type</h3>
 <?php echo $delivery_type; ?>
+
 <h3>Total Price: <?php echo $total; ?></h3>
+
 <form method="POST" action="proses-payment.php">
     <input type="hidden" name="delivery_type" value="<?php echo $delivery_type; ?>">
     <input type="hidden" name="total_harga" value="<?php echo $total; ?>">
+
     <?php foreach ($picked as $id) { ?>
-    <input type="hidden" name="picked[]" value="<?php echo $id; ?>">
+        <input type="hidden" name="picked[]" value="<?php echo $id; ?>">
     <?php } ?>
+
     <?php if ($delivery_type == "delivery") { ?>
     <h3>Delivery Info</h3>
     Address: <input type="text" name="address"><br><br>
@@ -74,6 +112,7 @@ if ($delivery_type == "digital") {
     Postal Code: <input type="text" name="postal_code"><br><br>
     Phone: <input type="text" name="phone"><br><br>
     <?php } ?>
+
     <h3>Payment</h3>
     Payment Method:
     <select name="payment_method">
@@ -86,6 +125,8 @@ if ($delivery_type == "digital") {
         <option value="cod">Cash on Delivery</option>
         <?php } ?>
     </select>
-    <br><br><button type="submit">Confirm Payment</button>
 
+    <br><br>
+    <button type="submit">Confirm Payment</button>
+    <a href="cart.php" class="cancel_link">Cancel - Go to Cart</a>
 </form>
