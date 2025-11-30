@@ -106,7 +106,7 @@ foreach($data_seller as $row){
     
     <!-- HEADER -->
     <div class="header-top">
-        <a href="report.php" class="btn-back">
+        <a href="admin_report.php" class="btn-back">
             <i class="fas fa-arrow-left icon-arrow"></i> BACK
         </a>
         <h2>Grafik Performa Penjual</h2>

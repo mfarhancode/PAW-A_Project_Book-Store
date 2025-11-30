@@ -1,54 +1,60 @@
 <?php 
 require "../connection.php";
 session_start();
-if (!($_SESSION['login'])) {
+
+if (!isset($_SESSION['login'])) {
     header("Location: ../login.php");
     exit;
 }
-$tgl_awal = isset($_GET['tgl_awal']) ? $_GET['tgl_awal'] : '';
-$tgl_akhir = isset($_GET['tgl_akhir']) ? $_GET['tgl_akhir'] : '';
+
+$tgl_awal = isset($_GET['tgl_awal']) ? $_GET['tgl_awal'] : date('Y-m-01');
+$tgl_akhir = isset($_GET['tgl_akhir']) ? $_GET['tgl_akhir'] : date('Y-m-d');
 
 $query = "
     SELECT 
-        DATE(pay.timestamp) as tanggal_harian, 
-        SUM(sold.price_at_sale) as total_pendapatan
+        b.judul as judul_buku,
+        b.ISBN,
+        SUM(sold.qty) as total_qty,
+        SUM(sold.price_at_sale) as total_pendapatan_buku
     FROM 
-        bst_payment_detail as pay 
+        bst_sold_books sold
     JOIN 
-        bst_sold_books as sold ON pay.payment_id = sold.id
+        bst_payment_detail pay ON sold.payment_id = pay.payment_id
+    JOIN 
+        bst_books b ON sold.ISBN = b.ISBN  -- Join pakai ISBN
     WHERE
         DATE(pay.timestamp) BETWEEN '$tgl_awal' AND '$tgl_akhir'
     GROUP BY 
-        tanggal_harian
-    ORDER BY
-        tanggal_harian ASC
+        b.ISBN  -- Kelompokkan berdasarkan buku unik
+    ORDER BY 
+        total_qty DESC -- Urutkan dari yang paling laku
+    LIMIT 15 -- Batasi 15 buku teratas agar grafik tidak kepenuhan
 ";
-$execute = mysqli_query($conn, $query);
-$rekap_harian = mysqli_fetch_all($execute, MYSQLI_ASSOC);
 
-$tanggal = [];
-$total_harga = [];
-foreach($rekap_harian as $value){
-    $tanggal[] = $value['tanggal_harian'];
-    $total_harga[] = $value['total_pendapatan'];
+$execute = mysqli_query($conn, $query);
+
+if(!$execute) {
+    die("Error Query: " . mysqli_error($conn));
 }
 
-$query_total = "
-    SELECT 
-        COUNT(DISTINCT pay.payment_id) as total_pelanggan, 
-        SUM(sold.price_at_sale) as total_pendapatan_kumulatif
-    FROM 
-        bst_payment_detail as pay 
-    JOIN 
-        bst_sold_books as sold ON pay.payment_id = sold.id
-    WHERE
-        DATE(pay.timestamp) BETWEEN '$tgl_awal' AND '$tgl_akhir'
-";
-$execute_total = mysqli_query($conn, $query_total);
-$total_data = mysqli_fetch_assoc($execute_total);
+$rekap_buku = mysqli_fetch_all($execute, MYSQLI_ASSOC);
 
-$total_pelanggan = $total_data['total_pelanggan'];
-$total_pendapatan_rp = number_format($total_data['total_pendapatan_kumulatif'], 0, ',', '.');
+$list_judul = [];
+$list_qty = [];
+
+foreach($rekap_buku as $value){
+
+    $judul_pendek = strlen($value['judul_buku']) > 20 ? substr($value['judul_buku'], 0, 20) . '...' : $value['judul_buku'];
+    $list_judul[] = $judul_pendek;
+    $list_qty[] = $value['total_qty'];
+}
+
+$grand_total_qty = 0;
+$grand_total_rp = 0;
+foreach($rekap_buku as $val) {
+    $grand_total_qty += $val['total_qty'];
+    $grand_total_rp += $val['total_pendapatan_buku'];
+}
 ?>
 
 <!DOCTYPE html>
@@ -56,7 +62,7 @@ $total_pendapatan_rp = number_format($total_data['total_pendapatan_kumulatif'], 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan Buku Terjual</title>
+    <title>Laporan Penjualan Buku</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -64,6 +70,7 @@ $total_pendapatan_rp = number_format($total_data['total_pendapatan_kumulatif'], 
         .container { max-width: 900px; margin: 20px auto; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        
         .header-top {
             display: flex;
             align-items: center;
@@ -86,28 +93,25 @@ $total_pendapatan_rp = number_format($total_data['total_pendapatan_kumulatif'], 
             margin-right: 8px;
         }
         
-    
-        .header-top h2 {
-            margin: 0; 
-        }
+        .header-top h2 { margin: 0; }
 
         .total-box { display: flex; justify-content: space-around; padding: 15px; background-color: #e6f7ff; border: 1px solid #b3e0ff; margin-top: 20px; }
         .filter-form { margin-bottom: 20px; padding: 10px; border: 1px solid #ccc; }
         .no-print { margin-bottom: 10px; }
+        
         @media print{
-            .no-print, .filter-form {
-                display: none;
-            }
+            .no-print, .filter-form { display: none; }
         }
     </style>
 </head>
 <body>
 <div class="container">
+    
     <div class="header-top">
-        <a href="report.php" class="btn-back">
+        <a href="admin_report.php" class="btn-back">
             <i class="fas fa-arrow-left icon-arrow"></i> BACK
         </a>
-        <h2>Rekap Laporan Buku Terjual</h2>
+        <h2>Laporan Top Buku Terlaris</h2>
     </div>
 
     <div class="filter-form no-print">
@@ -122,63 +126,92 @@ $total_pendapatan_rp = number_format($total_data['total_pendapatan_kumulatif'], 
 
     <div class="no-print">
         <button onclick="window.print()" class="no-print">Cetak (Print)</button>
-        <button onclick="window.location='export_excel.php?tgl_awal=<?= $tgl_awal ?>&tgl_akhir=<?= $tgl_akhir ?>'">Export ke Excel</button>
     </div>
 
-    <h3>Grafik Buku Terjual</h3>
-    <canvas id="my_canvas" style="height: 300px;"></canvas>
+    <h3>Grafik Buku Terlaris (Top 15)</h3>
+    <canvas id="bookCanvas" style="height: 350px;"></canvas>
     <hr>
 
-    <h3>Rekap Detail (<?= $tgl_awal ?> s.d <?= $tgl_akhir ?>)</h3>
+    <h3>Rincian Data (<?= $tgl_awal ?> s.d <?= $tgl_akhir ?>)</h3>
     <table>
         <thead>
             <tr>
                 <th>No</th>
-                <th>Tanggal</th>
-                <th>Total Pendapatan</th>
+                <th>Judul Buku</th>
+                <th>ISBN</th>
+                <th>Terjual (Pcs)</th>
+                <th>Total Pendapatan (RP)</th>
             </tr>
         </thead>
         <tbody>
-            <?php $no = 1; ?>
-            <?php foreach($rekap_harian as $value): ?>
+            <?php 
+            $no = 1;
+            if(!empty($rekap_buku)):
+                foreach($rekap_buku as $value): 
+            ?>
             <tr>
                 <td><?= $no++ ?></td>
-                <td><?= date('d M Y', strtotime($value['tanggal_harian'])) ?></td>
-                <td>RP. <?= number_format($value['total_pendapatan'], 0, ',', '.') ?></td>
+                <td><?= htmlspecialchars($value['judul_buku']) ?></td>
+                <td><?= htmlspecialchars($value['ISBN']) ?></td>
+                <td><?= $value['total_qty'] ?></td>
+                <td>RP. <?= number_format($value['total_pendapatan_buku'], 0, ',', '.') ?></td>
             </tr>
-            <?php endforeach; ?>
+            <?php 
+                endforeach; 
+            else:
+            ?>
+            <tr><td colspan="5" align="center">Belum ada buku terjual pada periode ini.</td></tr>
+            <?php endif; ?>
         </tbody>
     </table>
     <hr>
 
-    <h3>Total Kumulatif</h3>
+    <h3>Ringkasan (Dari Data Di Atas)</h3>
     <div class="total-box">
-        <div>Jumlah Pelanggan: **<?= $total_pelanggan ?> Orang**</div>
-        <div>Jumlah Pendapatan: **RP. <?= $total_pendapatan_rp ?>**</div>
+        <div>Total Item Terjual: <b><?= $grand_total_qty ?> Pcs</b></div>
+        <div>Total Omzet: <b>RP. <?= number_format($grand_total_rp, 0, ',', '.') ?></b></div>
     </div>
 </div>
 
 <script>
-
-    const ctx = document.getElementById('my_canvas');
+    const ctx = document.getElementById('bookCanvas');
+    
     new Chart(ctx, {
         type: 'bar',
         data: {
-        labels: <?= json_encode($tanggal)  ?>,
-        datasets: [{
-            label: 'Total Pendapatan Harian (RP)',
-            data: <?= json_encode($total_harga)  ?>,
-            backgroundColor: 'rgba(54, 162, 235, 0.5)',
-            borderColor: 'rgba(54, 162, 235, 1)',
-            borderWidth: 1
-        }]
+            labels: <?= json_encode($list_judul) ?>,
+            datasets: [{
+                label: 'Jumlah Terjual (Pcs)',
+                data: <?= json_encode($list_qty) ?>,
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1,
+                borderRadius: 4
+            }]
         },
         options: {
-        scales: {
-            y: {
-            beginAtZero: true
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Jumlah (Unit)'
+                    }
+                },
+                x: {
+                    ticks: {
+                        maxRotation: 45,
+                        minRotation: 45
+                    }
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Statistik Buku Paling Laku'
+                }
             }
-        }
         }
     });
 </script>

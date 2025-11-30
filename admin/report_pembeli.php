@@ -10,8 +10,7 @@ if (!isset($_SESSION['login'])) {
 $tgl_awal = isset($_GET['tgl_awal']) ? $_GET['tgl_awal'] : date('Y-m-01');
 $tgl_akhir = isset($_GET['tgl_akhir']) ? $_GET['tgl_akhir'] : date('Y-m-d');
 
-// --- QUERY UTAMA ---
-// Mencari Buyer -> Join ke Pembayaran -> Join ke Buku Terjual
+// --- QUERY UTAMA (SUDAH DIPERBAIKI) ---
 $query = "
     SELECT 
         u.name as nama_pembeli, 
@@ -20,7 +19,7 @@ $query = "
     FROM 
         bst_user u
     JOIN 
-        bst_payment_detail pay ON u.id = pay.user_id  -- ASUMSI: pay punya kolom user_id
+        bst_payment_detail pay ON u.id = pay.buyer_id  -- Bagian ini yang tadi error
     JOIN 
         bst_sold_books sold ON pay.payment_id = sold.payment_id
     WHERE
@@ -30,10 +29,15 @@ $query = "
         u.id
     ORDER BY 
         total_buku_dibeli DESC
-    LIMIT 10 -- Ambil Top 10 Pembeli saja agar grafik rapi
+    LIMIT 10
 ";
 
 $execute = mysqli_query($conn, $query);
+
+// Cek error lagi untuk memastikan
+if(!$execute) {
+    die("Error Query Baru: " . mysqli_error($conn));
+}
 
 // Cek error query untuk debugging
 if(!$execute) {
@@ -112,7 +116,7 @@ foreach($rekap_buyer as $val) {
     
     <!-- HEADER -->
     <div class="header-top">
-        <a href="dashboard.php" class="btn-back">
+        <a href="admin_report.php" class="btn-back">
             <i class="fas fa-arrow-left icon-arrow"></i> BACK
         </a>
         <h2>Laporan Top Pembeli (Buyer)</h2>

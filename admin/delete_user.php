@@ -9,7 +9,7 @@ if (!($_SESSION['login'])) {
 
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
-    $sql="DELETE FROM bst_user WHERE id = $id";
+    $sql="DELETE FROM bst_user WHERE id = '$id'";
 
     if (mysqli_query($conn,$sql)) {
     } else {
@@ -18,7 +18,7 @@ if (isset($_GET['id'])) {
 
 }
 
-header("Location: index.php");
+header("Location: users_data.php");
 exit;
 
 ?>

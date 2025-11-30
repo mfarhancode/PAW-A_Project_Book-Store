@@ -130,12 +130,12 @@ $result = mysqli_query($conn, $query);
                 <li><a href="admin_dashboard.php">Dashboard</a></li>
                 <li><a href="users_data.php">Manage users</a></li>
                 <li><a href="all_books.php">All Books</a></li>
-                <li><a href="report.php">Report</a></li>
+                <li><a href="admin_report.php">Report</a></li>
             </ul>
         </div>
 
         <div class="main-content">
-            <h2><?php include "../partials/header.php";?></h2>
+            <h2>Manage Users</h2>
 
             <div class="user-list-box">
                 
@@ -153,7 +153,7 @@ $result = mysqli_query($conn, $query);
                     while ($row = mysqli_fetch_assoc($result)) {
                 ?>
                         <div class="table-row table-data">
-                            <div><?php echo $row['id']; ?></div> 
+                            <div><?php echo $no; ?></div> 
                             
                             <div><?php echo $row['username']; ?></div>
                             
@@ -162,7 +162,7 @@ $result = mysqli_query($conn, $query);
                             <div><?php echo $row['level']; ?></div>
                             
                             <div style="text-align: center;">
-                                <button class="btn" onclick="konfirmasiHapus(<?php echo $row['id']; ?>)">delete</button>
+                                <a class="btn" href="edit_user.php?id=<?=$row['id']?>" >edit</a>
                             </div>
                         </div>
                 <?php

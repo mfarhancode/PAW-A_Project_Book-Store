@@ -50,7 +50,7 @@ if (isset($_GET['id'])) {
 
     if (mysqli_num_rows($result) > 0) {
         $row = mysqli_fetch_assoc($result);
-        $nama = $row['nama'];
+        $nama = $row['name'];
         $username = $row['username'];
         $level = $row['level'];
     } else {
@@ -92,7 +92,7 @@ if (isset($_GET['id'])) {
         
         <br><br>
         <button class="simpan" type="submit" name="update">Update Data</button>
-        <button type="button" class="batal" onclick="location.href='index.php'">Batal</button>
+        <button type="button" class="batal" onclick="location.href='users_data.php'">Batal</button>
     </form>
 </body>
 </html>
