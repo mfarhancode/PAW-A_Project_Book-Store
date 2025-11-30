@@ -10,11 +10,7 @@ require "../connection.php";
 
 
 $name =  $_SESSION['name'];
-echo "<h2>Welcome $name!</h2>";
 
-echo "<h3>Edit book's data</h3>";
-
-echo "<hr>";
 
 $id = $_GET['id'];
 
@@ -86,7 +82,7 @@ $sql = "UPDATE bst_books SET
 if ($conn->query($sql) === TRUE) {
     echo '<script>
         alert("Book updated successfully! Redirecting...");
-        window.location.href = "seller_dashboard.php";
+        window.location.href = "seller_books.php";
         </script>';
 } else {
     echo "Error: " . $conn->error;
@@ -96,11 +92,17 @@ if ($conn->query($sql) === TRUE) {
 }
 
 
-
+include "../partials/header.php";
 ?>
 
 <!DOCTYPE html>
+<head>
+    <link rel="stylesheet" href="../assets/add_book.css">
+</head>
 <body>
+<div class="container">
+    <h3>Edit book's data</h3>
+   <hr>
 
 <?php foreach($errors as $error): ?>
     <p style="color:red"><?= $error ?></p>
@@ -152,14 +154,14 @@ if ($conn->query($sql) === TRUE) {
     <br>
 
     <input type="submit" value="Edit">
-    <a href="seller_dashboard.php"><button type="button">Cancel</button></a>
+    <a href="seller_books.php"><button type="button">Cancel</button></a>
 
 
 </form>
+</div>
 
-<hr>
-<a href='../logout.php'>Logout</a>
 </body>
 </html>
+<?php include "../partials/footer.php"; ?>
 
 
