@@ -43,38 +43,58 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 }
 ?>
-<!DOCTYPE html>
-<body>
+
+<!-- <body>
 <h1>Create Account!</h1>
 
 <?php foreach($errors as $error): ?>
     <p style="color:red"><?= htmlspecialchars($error) ?></p>
 <?php endforeach; ?>
 
-<form method="post">
-    <label>Name:</label>
-    <input type="text" name="name" value="<?= htmlspecialchars($name) ?>">
-    <br>
 
-    <label>Username:</label>
-    <input type="text" name="username" value="<?= htmlspecialchars($username) ?>">
-    <br>
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="assets/register.css">
+</head>
+<body>
 
-    <label>Password:</label>
-    <input type="password" name="password" value="<?= htmlspecialchars($password) ?>">
-    <br>
+<div class="register-container">
+    <div class="register-box">
 
-    <label>Level:</label>
-    <select name="level">
-        <option value="">--select--</option>
-        <option value="seller" <?= $level=='seller'?'selected':'' ?>>Seller</option>
-        <option value="buyer" <?= $level=='buyer'?'selected':'' ?>>Buyer</option>
-    </select>
-    <br>
+        <h2>Create Account</h2>
 
-    <input type="submit" value="Submit">
-</form>
+        <?php foreach($errors as $error): ?>
+            <p style="color:red"><?= htmlspecialchars($error) ?></p>
+        <?php endforeach; ?>
 
-<p>Already have an account? <a href="login.php">Login</a></p>
+        <form method="post">
+            <label>Name:</label>
+            <input type="text" name="name" value="<?= htmlspecialchars($name) ?>">
+
+            <label>Username:</label>
+            <input type="text" name="username" value="<?= htmlspecialchars($username) ?>">
+
+            <label>Password:</label>
+            <input type="password" name="password" value="<?= htmlspecialchars($password) ?>">
+            <br>
+            <label>Level:</label>
+            <br>
+            <select name="level">
+                <option value="">--select--</option>
+                <option value="seller" <?= $level=='seller' ? 'selected' : '' ?>>Seller</option>
+                <option value="buyer" <?= $level=='buyer' ? 'selected' : '' ?>>Buyer</option>
+            </select>
+
+            <input type="submit" value="Register">
+        </form>
+
+        <p class="login-link">
+            Already have an account? <a href="login.php">Login</a>
+        </p>
+
+    </div>
+</div>
+
 </body>
 </html>
