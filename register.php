@@ -44,12 +44,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 ?>
 
-<!-- <body>
-<h1>Create Account!</h1>
-
-<?php foreach($errors as $error): ?>
-    <p style="color:red"><?= htmlspecialchars($error) ?></p>
-<?php endforeach; ?>
 
 
 <!DOCTYPE html>
