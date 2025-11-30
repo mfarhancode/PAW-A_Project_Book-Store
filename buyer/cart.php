@@ -4,6 +4,7 @@ if (!($_SESSION['login']) || $_SESSION['level'] != 'buyer') {
     header("Location: ../login.php");
     exit;
 }
+
 require "../connection.php";
 
 $buyer_id = $_SESSION['id'];
@@ -12,14 +13,18 @@ $name = $_SESSION['name'];
 include "../partials/header.php";
 echo "<h2>Welcome $name</h2>";
 
-// CLEAR CART
+/* ---------------------------
+   CLEAR CART
+-----------------------------*/
 if (isset($_GET['clear_cart'])) {
     mysqli_query($conn, "DELETE FROM bst_cart WHERE buyer_id='$buyer_id'");
     header("Location: cart.php");
     exit;
 }
 
-// DELETE ONE ITEM
+/* ---------------------------
+   DELETE ONE ITEM
+-----------------------------*/
 if (isset($_GET['delete'])) {
     $cid = intval($_GET['delete']);
     mysqli_query($conn, "DELETE FROM bst_cart WHERE id='$cid' AND buyer_id='$buyer_id'");
@@ -27,11 +32,9 @@ if (isset($_GET['delete'])) {
     exit;
 }
 
-// UPDATE via edit_qty.php (handled there)
-// so no update handling here.
-
-//
-// GET CART ITEMS
+/* ---------------------------
+   GET CART ITEMS
+-----------------------------*/
 $q = "
 SELECT c.id, c.qty,
        b.judul, b.harga, b.ISBN, b.image, b.stok,
@@ -52,11 +55,42 @@ if (mysqli_num_rows($res) == 0) {
     include "../partials/footer.php";
     exit;
 }
+
+/* ---------------------------
+   CHECK IF ANY ITEM > STOCK
+-----------------------------*/
+$stockCheckQ = "
+SELECT c.id, b.judul, c.qty AS cart_qty, b.stok
+FROM bst_cart c
+JOIN bst_books b ON c.ISBN = b.ISBN
+WHERE c.buyer_id = '$buyer_id' AND c.qty > b.stok
+";
+
+$stockRes = mysqli_query($conn, $stockCheckQ);
+
+$insufficient = [];
+while ($r = mysqli_fetch_assoc($stockRes)) {
+    $insufficient[] = $r;
+}
+
+$disable_checkout = count($insufficient) > 0;
+
 ?>
 
 <link rel="stylesheet" href="../assets/seller_books.css">
 
-<!-- BIG CHECKOUT FORM wraps table so checkboxes + radios are sent reliably -->
+<?php if ($disable_checkout): ?>
+<div style="padding:10px; background:#ffdddd; border:1px solid #cc0000; margin-bottom:15px;">
+    <strong style="color:#c00;">Warning:</strong> Some books in your cart have less stock now.<br><br>
+    <?php foreach ($insufficient as $it): ?>
+        <?= htmlspecialchars($it['judul']) ?> — in cart: <b><?= $it['cart_qty'] ?></b>,
+        available: <b><?= $it['stok'] ?></b><br>
+    <?php endforeach; ?>
+    <br>Please update quantity before checkout.
+</div>
+<?php endif; ?>
+
+<!-- BIG CHECKOUT FORM -->
 <form id="checkoutForm" method="POST" action="checkout.php">
 
 <table border="1" cellpadding="5">
@@ -74,7 +108,9 @@ if (mysqli_num_rows($res) == 0) {
     <th>Action</th>
 </tr>
 
-<?php while ($row = mysqli_fetch_assoc($res)) {
+<?php
+mysqli_data_seek($res, 0); // reset pointer
+while ($row = mysqli_fetch_assoc($res)) {
     $cart_id = $row['id'];
     $qty = intval($row['qty']);
     $stock = intval($row['stok']);
@@ -84,10 +120,7 @@ if (mysqli_num_rows($res) == 0) {
 ?>
 <tr>
 
-    <td>
-        <!-- checkbox inside the checkout form -->
-        <input type="checkbox" name="picked[]" value="<?= $cart_id ?>">
-    </td>
+    <td><input type="checkbox" name="picked[]" value="<?= $cart_id ?>"></td>
 
     <td><img src="../uploads/<?= htmlspecialchars($row['image']) ?>" width="60"></td>
 
@@ -96,9 +129,7 @@ if (mysqli_num_rows($res) == 0) {
     <td><?= htmlspecialchars($row['seller_name']) ?></td>
 
     <td>
-        <!-- show qty (user can change on separate page) -->
-        <?= $qty ?>
-        <br>
+        <?= $qty ?><br>
         <a class="link_button" href="edit_qty.php?id=<?= $cart_id ?>">Edit Qty</a>
     </td>
 
@@ -108,7 +139,8 @@ if (mysqli_num_rows($res) == 0) {
     <td><?= $subtotal ?></td>
 
     <td>
-        <a class="link_button" href="cart.php?delete=<?= $cart_id ?>"
+        <a class="link_button"
+           href="cart.php?delete=<?= $cart_id ?>"
            onclick="return confirm('Remove this item?')">Remove</a>
     </td>
 
@@ -123,7 +155,15 @@ if (mysqli_num_rows($res) == 0) {
 <label><input type="radio" name="delivery_type" value="delivery" checked> Hard copy</label>
 <br><br>
 
-<button type="submit" class="link_button">Proceed to Checkout</button>
+<?php if ($disable_checkout): ?>
+    <button type="submit" class="link_button"
+            disabled style="opacity:0.6; cursor:not-allowed;">
+        Proceed to Checkout
+    </button>
+<?php else: ?>
+    <button type="submit" class="link_button">Proceed to Checkout</button>
+<?php endif; ?>
+
 </form>
 
 <br>
