@@ -1,6 +1,10 @@
+
 <!DOCTYPE html>
+<head>
+  <link rel="stylesheet" href="assets/login.css">
+</head>
 <body>
- <h1>Login Page!</h1>
+ <!-- <h1>Login Page!</h1>
  <form method="post">
     <label>Username:</label>
     <input type="text" name="username" required>
@@ -9,7 +13,27 @@
     <input type="password" name="password">
     <br>
     <input type="submit" value="Submit">
- </form>    
+ </form>     -->
+ <div class="login-container">
+    <div class="login-box">
+        <h2>Welcome to Book Store</h2>
+        <p>Please login to continue</p>
+
+        <form method="post">
+            <label>Username:</label>
+            <input type="text" name="username" required>
+
+            <label>Password:</label>
+            <input type="password" name="password" required>
+
+            <input type="submit" value="Login">
+        </form>
+
+        <p class="register-link">
+            Don't have an account? <a href="register.php">Register here</a>
+        </p>
+    </div>
+</div>
 </body>
 </html>
 
@@ -57,4 +81,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 ?>
 
-<p>Don't have an account yet? <a href="register.php"> Create account</a></p>
+<!-- <p>Don't have an account yet? <a href="register.php"> Create account</a></p> -->
+
