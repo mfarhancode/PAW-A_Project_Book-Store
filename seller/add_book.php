@@ -9,11 +9,8 @@ require "../connection.php";
 
 
 $name =  $_SESSION['name'];
-echo "<h2>Welcome $name!</h2>";
 
-echo "<h3>Add books</h3>";
 
-echo "<hr>";
 
 $isbn = $_POST['isbn'] ?? "";
 $judul = $_POST['judul'] ?? "";
@@ -79,12 +76,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 
 
-
+include "../partials/header.php";
 ?>
 
 <!DOCTYPE html>
+<head>
+    <link rel="stylesheet" href="../assets/add_book.css">
+</head>
 <body>
-
+<div class="container">
+    <h3><?=$name?>! Add book by filling this form</h3>
+   <hr>
 <?php foreach($errors as $error): ?>
     <p style="color:red"><?= $error ?></p>
 <?php endforeach; ?>
@@ -136,10 +138,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 
 </form>
+</div>
 
-<hr>
-<a href='../logout.php'>Logout</a>
 </body>
 </html>
-
+<?php include "../partials/footer.php"; ?>
 
