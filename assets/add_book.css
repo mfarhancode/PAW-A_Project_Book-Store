@@ -1,0 +1,55 @@
+/* Center content and limit width */
+.container {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 10px;
+}
+
+/* Form labels and inputs */
+form label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+form input[type="text"],
+form input[type="number"],
+form input[type="file"],
+form textarea {
+    width: 100%;
+    padding: 7px;
+    margin-top: 4px;
+    border: 1px solid #ccc;
+}
+
+/* Submit + cancel buttons */
+form input[type="submit"],
+form button {
+    padding: 8px 16px;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+form input[type="submit"] {
+    background: #333;
+    color: white;
+    border: none;
+}
+
+form input[type="submit"]:hover {
+    background: #555;
+}
+
+form button {
+    background: #aaa;
+    border: none;
+}
+
+form button:hover {
+    background: #888;
+}
+
+/* Error messages */
+p {
+    margin: 5px 0;
+}

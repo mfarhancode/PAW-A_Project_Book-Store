@@ -1,0 +1,45 @@
+/* Simple container */
+.container {
+    margin: 10px auto;
+    padding: 0 10px;
+}
+
+/* Search bar */
+input[type="text"] {
+    padding: 6px;
+    width: 200px;
+}
+
+.link_button {
+    display: inline-block;
+    margin: 8px 0;
+    padding: 8px 12px;
+    background: #3A7BD5;
+    color: white;
+    text-decoration: none;
+}
+
+.link_button:hover {
+    background: #555;
+}
+
+button {
+    padding: 6px 10px;
+    cursor: pointer;
+}
+
+/* Table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+table th, table td {
+    border: 1px solid #ccc;
+    padding: 8px;
+}
+
+table th {
+    background: #f0f0f0;
+}

@@ -1,0 +1,29 @@
+/* Page wrapper */
+.dashboard-container {
+    width: 80%;
+    margin: 40px auto;
+}
+
+/* Page title */
+.dashboard-container h1 {
+    margin-bottom: 5px;
+}
+
+/* Links/buttons */
+.dashboard-container a {
+    display: inline-block;
+    margin: 8px 0;
+    padding: 8px 12px;
+    background: #3A7BD5;
+    color: #fff;
+    text-decoration: none;
+}
+
+.dashboard-container a:hover {
+    background: #555;
+}
+
+/* Horizontal line spacing */
+hr {
+    margin: 20px 0;
+}

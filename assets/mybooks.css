@@ -1,0 +1,44 @@
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 15px;
+    background: #fafafa;
+    border: 1px solid #ddd;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+table th, table td {
+    border: 1px solid #ccc;
+    padding: 8px;
+}
+
+table th {
+    background: #eee;
+}
+
+.link_button {
+    padding: 6px 10px;
+    background: #3A7BD5;
+    color: white;
+    text-decoration: none;
+}
+
+.link_button:hover {
+    background: #555;
+}
+
+.btn_back {
+    padding: 8px 12px;
+    background: #3A7BD5;
+    color: #fff;
+    text-decoration: none;
+}
+
+.btn_back:hover {
+    background: #555;
+}

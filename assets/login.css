@@ -1,0 +1,53 @@
+/* Center the login box */
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 70vh;
+}
+
+/* Login card */
+.login-box {
+    width: 320px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #fafafa;
+    box-shadow: 0 0 5px rgba(0,0,0,0.1);
+}
+
+/* Title */
+.login-box h2 {
+    margin-top: 0;
+}
+
+/* Inputs */
+.login-box input[type="text"],
+.login-box input[type="password"] {
+    width: 80%;
+    padding: 8px;
+    margin: 6px 0 12px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* Submit button */
+.login-box input[type="submit"] {
+    width: 85%;
+    padding: 8px;
+    background: #333;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.login-box input[type="submit"]:hover {
+    background: #555;
+}
+
+/* Register link */
+.register-link {
+    text-align: center;
+    margin-top: 10px;
+}
