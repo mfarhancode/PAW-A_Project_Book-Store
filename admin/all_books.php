@@ -34,6 +34,7 @@ $pages = ceil($total / $limit);
 // Fetch records
 $sql = "SELECT * FROM bst_books WHERE judul LIKE '%$search%' LIMIT $start, $limit";
 $result = mysqli_query($conn, $sql);
+
 ?>
 
 <!DOCTYPE html>
@@ -174,22 +175,6 @@ $result = mysqli_query($conn, $sql);
             background: #4a4aee;
             color: #fff;
         }
-
-        /* LOGOUT */
-        a[href*='logout'] {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 14px;
-            background: #e63946;
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            font-weight: bold;
-        }
-
-        a[href*='logout']:hover {
-            background: #c72d3a;
-        }
     </style>
 </head>
 <body>
@@ -204,7 +189,7 @@ $result = mysqli_query($conn, $sql);
             </ul>
         </div>
         <div class="main-content">
-            <h2>All Book</h2>
+            <h2><?php include "../partials/header.php";?></h2>
            <div class="sold-book">
             <h3>Daftar Buku</h3>
             <form method='GET'>
@@ -247,8 +232,6 @@ $result = mysqli_query($conn, $sql);
             <?php } ?>
 
 
-            <hr>
-            <a href='../logout.php'>Logout</a>
             </div>
         </div>
     </div>
