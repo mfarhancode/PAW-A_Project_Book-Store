@@ -142,21 +142,6 @@ $reportCount = $qReport->fetch_assoc()['total'];
 
         .card-title { font-size: 18px; margin-bottom: 5px; font-weight: 500; }
         .card-value { font-size: 22px; font-weight: 400; }
-          /* LOGOUT */
-        a[href*='logout'] {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 14px;
-            background: #e63946;
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            font-weight: bold;
-        }
-
-        a[href*='logout']:hover {
-            background: #c72d3a;
-        }
 
     </style>
 </head>
@@ -175,7 +160,7 @@ $reportCount = $qReport->fetch_assoc()['total'];
         </div>
 
         <div class="main-content">
-            <h2>Dashboard</h2>
+            <h2><?php include "../partials/header.php";?></h2>
 
             <div class="cards-wrapper">
                 
@@ -198,7 +183,6 @@ $reportCount = $qReport->fetch_assoc()['total'];
                     <div class="card-title">Books</div>
                     <div class="card-value"><?php echo $booksCount; ?></div>
                 </div>
-                <a href='../logout.php'>Logout</a>
             </div>
         </div>
 
