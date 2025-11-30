@@ -135,7 +135,7 @@ $result = mysqli_query($conn, $query);
         </div>
 
         <div class="main-content">
-            <h2>Manage Users</h2>
+            <h2><?php include "../partials/header.php";?></h2>
 
             <div class="user-list-box">
                 
