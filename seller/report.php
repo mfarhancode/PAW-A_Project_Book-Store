@@ -1,15 +1,48 @@
 <?php
 require "../connection.php";
 session_start();
-if (!($_SESSION['login'])) {
+
+if (!isset($_SESSION['login'])) {
     header("Location: ../login.php");
     exit;
 }
 
-$total_books   = 14500;
-$total_pembeli  = 1200;
-$total_penjualan = 435;
-$total_pendapatan  = 68;
+// Ambil ID Seller dari Session
+// Asumsi: Saat login, kamu menyimpan id user ke $_SESSION['user_id'] atau similar
+$seller_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0; 
+
+// --- LOGIKA QUERY DATA KHUSUS SELLER ---
+
+// 1. Total Buku (Hanya milik seller ini)
+// Pastikan tabel bst_books punya kolom 'seller_id' atau 'id_user'
+$q_books = mysqli_query($conn, "SELECT COUNT(*) as total FROM bst_books WHERE seller_id = '$seller_id'");
+$d_books = mysqli_fetch_assoc($q_books);
+$total_books = $d_books['total'] ?? 0;
+
+// 2. Total Buku Terjual (Penjualan)
+// Join tabel sold_books dengan books untuk filter punya seller ini
+$q_sold = mysqli_query($conn, "
+    SELECT SUM(s.qty) as total_qty, SUM(s.price_at_sale) as total_duit
+    FROM bst_sold_books s
+    JOIN bst_books b ON s.ISBN = b.ISBN 
+    WHERE b.seller_id = '$seller_id'
+");
+$d_sold = mysqli_fetch_assoc($q_sold);
+
+$total_penjualan  = $d_sold['total_qty'] ?? 0; // Jumlah pcs buku terjual
+$total_pendapatan = $d_sold['total_duit'] ?? 0; // Total uang
+
+// 3. Total Pembeli (Unik)
+$q_buyer = mysqli_query($conn, "
+    SELECT COUNT(DISTINCT pay.buyer_id) as total_buyer
+    FROM bst_sold_books s
+    JOIN bst_books b ON s.ISBN = b.ISBN
+    JOIN bst_payment_detail pay ON s.payment_id = pay.payment_id
+    WHERE b.seller_id = '$seller_id'
+");
+$d_buyer = mysqli_fetch_assoc($q_buyer);
+$total_pembeli = $d_buyer['total_buyer'] ?? 0;
+
 ?>
 
 <!DOCTYPE html>
@@ -17,161 +50,200 @@ $total_pendapatan  = 68;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>seller Report</title>
+    <title>Seller Report</title>
     <style>
+        /* RESET & BASIC SETUP */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            background-color: #bde0fe;
-            height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #ffffff;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            min-height: 100vh; /* Agar footer selalu di bawah */
+        }
+
+        /* HEADER / NAVBAR */
+        .navbar {
+            background-color: #387bd6; /* Warna Biru Header */
+            color: white;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
             align-items: center;
         }
 
-        .dashboard-container {
-            width: 90%;
-            max-width: 1000px;
-            height: 80vh;
-            background-color: #f8f9fe;
-            display: flex;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            border-radius: 8px;
-            overflow: hidden;
+        .navbar .brand {
+            font-size: 18px;
+            font-weight: 500;
         }
 
-        /* SIDEBAR */
-        .sidebar {
-            width: 250px;
-            background-color: #f8f9fe;
-            padding: 40px 30px;
-            display: flex;
-            flex-direction: column;
+        .navbar .logout-link {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
         }
 
-        .sidebar h2 {
-            font-size: 24px;
+        .navbar .logout-link:hover {
+            text-decoration: underline;
+        }
+
+        /* MAIN CONTAINER */
+        .container {
+            width: 100%;
+            max-width: 1200px; /* Lebar konten dimaksimalkan */
+            margin: 40px auto;
+            padding: 0 40px;
+            flex: 1; /* Mengisi ruang kosong agar footer terdorong ke bawah */
+        }
+
+        /* TYPOGRAPHY */
+        h1 {
+            font-family: 'Times New Roman', Times, serif; /* Font Serif sesuai gambar */
+            font-size: 32px;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 10px;
+        }
+
+        h3 {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 20px;
+            font-weight: bold;
             color: #333;
             margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #dcdcdc;
         }
 
-        .menu { list-style: none; margin-top: 20px; }
-        .menu li { margin-bottom: 20px; }
-        .menu a {
-            text-decoration: none;
-            color: #333;
-            font-size: 16px;
-            display: block;
-            transition: 0.3s;
-        }
-        .menu a:hover { color: #5351e0; font-weight: bold; }
-
-        /* MAIN CONTENT */
-        .main-content {
-            flex: 1;
-            padding: 50px;
-            background-color: #f8f9fe;
+        hr {
+            border: 0;
+            border-top: 1px solid #ccc;
+            margin-bottom: 30px;
         }
 
-        .main-content h2 {
-            margin-bottom: 40px;
-            font-weight: bold;
-            text-transform: uppercase;
-            font-size: 22px;
-            letter-spacing: 1px;
-        }
-
-        /* STYLING KARTU */
-        .cards-wrapper {
+        /* BUTTONS NAV (Tombol Navigasi Cepat) */
+        .nav-buttons {
             display: flex;
-            flex-wrap: wrap;
-            gap: 60px 100px;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .btn-nav {
+            background-color: #387bd6;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            font-size: 14px;
+            border-radius: 2px;
+            display: inline-block;
+            transition: background 0.3s;
+        }
+
+        .btn-nav:hover {
+            background-color: #2a65b8;
+        }
+
+        /* REPORT CARDS GRID */
+        .report-section {
+            margin-top: 20px;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 30px;
         }
 
         .card {
-            background-color: #6ca0f5;
-            width: 220px;
-            height: 120px;
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            background-color: #387bd6; /* Warna Biru Card */
             color: white;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            transition: all 0.3s;
-            
-            /* PENTING: Agar kursor berubah jadi tangan */
-            cursor: pointer; 
+            padding: 30px;
+            border-radius: 5px; /* Radius sedikit tajam */
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+            cursor: pointer;
         }
 
-        /* Efek Hover agar user tahu ini bisa diklik */
         .card:hover {
-            transform: translateY(-5px); /* Naik sedikit */
-            background-color: #5b8de0;   /* Warna sedikit lebih gelap */
-            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
-        }
-        
-        /* Efek saat diklik */
-        .card:active {
-            transform: scale(0.98); /* Sedikit mengecil saat ditekan */
+            transform: translateY(-5px);
+            background-color: #2a65b8;
         }
 
-        .card-title { font-size: 18px; margin-bottom: 5px; font-weight: 500; }
-        .card-value { font-size: 22px; font-weight: 400; }
+        .card-title {
+            font-size: 18px;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .card-value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        /* FOOTER */
+        footer {
+            background-color: #eeeeee;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #ddd;
+            color: #333;
+            font-size: 14px;
+        }
 
     </style>
 </head>
 <body>
 
-    <div class="dashboard-container">
-        
-        <div class="sidebar">
-            <h2>Report</h2>
-            <ul class="menu">
-                <li><a href="seller_dashboard.php" style="font-weight:bold;">Dashboard</a></li>
-                <li><a href="seller_books.php">See all your books</a></li>
-                <li><a href="add_book.php">Add book</a></li>
-                <li><a href="report.php">Report</a></li>
-            </ul>
+    <header class="navbar">
+        <div class="brand">Book Store</div>
+        <a href="../logout.php" class="logout-link">Logout</a>
+    </header>
+
+    <div class="container">
+        <h1>Seller Report</h1>
+        <h3>Statistik Toko Anda</h3>
+        <hr>
+
+        <div class="nav-buttons">
+            <a href="seller_dashboard.php" class="btn-nav">Back to Dashboard</a>
+            <a href="seller_books.php" class="btn-nav">See all your books</a>
+            <a href="add_book.php" class="btn-nav">Add Books</a>
         </div>
 
-        <div class="main-content">
-            <h2>REPORT</h2>
-
-            <div class="cards-wrapper">
+        <div class="report-section">
+            <div class="cards-grid">
                 
-                <div class="card" onclick="location.href='report_buku.php'">
-                    <div class="card-title">Buku</div>
-                    <div class="card-value"><?php echo $total_books; ?></div>
-                </div>
-
-                <div class="card" onclick="location.href='report_pembeli.php'">
-                    <div class="card-title">Pembeli</div>
-                    <div class="card-value"><?php echo $total_pembeli; ?></div>
+                <div class="card" onclick="location.href='seller_books.php'">
+                    <div class="card-title">Total Buku</div>
+                    <div class="card-value"><?= number_format($total_books); ?></div>
                 </div>
 
                 <div class="card" onclick="location.href='report_penjualan.php'">
-                    <div class="card-title">Penjualan</div>
-                    <div class="card-value"><?php echo $total_penjualan; ?></div>
+                    <div class="card-title">Total Pembeli</div>
+                    <div class="card-value"><?= number_format($total_pembeli); ?></div>
+                </div>
+
+                <div class="card" onclick="location.href='report_penjualan.php'">
+                    <div class="card-title">Buku Terjual</div>
+                    <div class="card-value"><?= number_format($total_penjualan); ?> Pcs</div>
                 </div>
 
                 <div class="card" onclick="location.href='report_pendapatan.php'">
-                    <div class="card-title">Pnndapatan</div>
-                    <div class="card-value"><?php echo $total_pendapatan; ?></div>
+                    <div class="card-title">Total Pendapatan</div>
+                    <div class="card-value">Rp <?= number_format($total_pendapatan, 0, ',', '.'); ?></div>
                 </div>
 
             </div>
         </div>
-
     </div>
+
+    <footer>
+        &copy; 2025 Book Store
+    </footer>
 
 </body>
 </html>
