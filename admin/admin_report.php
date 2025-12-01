@@ -2,35 +2,27 @@
 require "../connection.php";
 session_start();
 
-// Cek Login
+
 if (!isset($_SESSION['login'])) {
     header("Location: ../login.php");
     exit;
 }
 
-// --- LOGIKA MENGHITUNG DATA DARI DATABASE ---
-
-// 1. Hitung Penjual (Seller)
-// Mengambil semua user yang level-nya 'seller'
 $query_seller = mysqli_query($conn, "SELECT COUNT(*) as total FROM bst_user WHERE level = 'seller'");
 $data_seller  = mysqli_fetch_assoc($query_seller);
 $total_user   = $data_seller['total']; 
 
-// 2. Hitung Pembeli (Buyer)
-// Mengambil semua user yang level-nya 'buyer'
-// (Saya simpan ke variabel $total_sales sesuai variabel aslimu)
+
+
+
 $query_buyer  = mysqli_query($conn, "SELECT COUNT(*) as total FROM bst_user WHERE level = 'buyer'");
 $data_buyer   = mysqli_fetch_assoc($query_buyer);
 $total_sales  = $data_buyer['total'];
 
-// 3. Hitung Genre (Kategori)
-// Menggunakan DISTINCT agar nama kategori yang sama tidak dihitung dobel
 $query_genre  = mysqli_query($conn, "SELECT COUNT(DISTINCT category) as total FROM bst_books WHERE category IS NOT NULL AND category != ''");
 $data_genre   = mysqli_fetch_assoc($query_genre);
-$total_report = $data_genre['total']; // Variabel aslimu bernama total_report
+$total_report = $data_genre['total']; 
 
-// 4. Hitung Total Buku (Books)
-// Menghitung seluruh baris di tabel buku
 $query_books  = mysqli_query($conn, "SELECT COUNT(*) as total FROM bst_books");
 $data_books   = mysqli_fetch_assoc($query_books);
 $total_books  = $data_books['total'];
