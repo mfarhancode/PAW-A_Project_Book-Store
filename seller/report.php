@@ -217,24 +217,24 @@ $total_pembeli = $d_buyer['total_buyer'] ?? 0;
         <div class="report-section">
             <div class="cards-grid">
                 
-                <div class="card" onclick="location.href='seller_books.php'">
-                    <div class="card-title">Total Buku</div>
+                <div class="card" onclick="location.href='report_penjualan.php'">
+                    <div class="card-title">Penjualan</div>
                     <div class="card-value"><?= number_format($total_books); ?></div>
                 </div>
 
-                <div class="card" onclick="location.href='report_penjualan.php'">
-                    <div class="card-title">Total Pembeli</div>
-                    <div class="card-value"><?= number_format($total_pembeli); ?></div>
+                <div class="card" onclick="location.href='report_pendapatan.php'">
+                    <div class="card-title">Total pendapatan</div>
+                    <div class="card-value">Rp <?= number_format($total_pendapatan, 0, ',', '.');?></div>
                 </div>
 
-                <div class="card" onclick="location.href='report_penjualan.php'">
+                <div class="card" onclick="location.href='report_buku.php'">
                     <div class="card-title">Buku Terjual</div>
                     <div class="card-value"><?= number_format($total_penjualan); ?> Pcs</div>
                 </div>
 
-                <div class="card" onclick="location.href='report_pendapatan.php'">
-                    <div class="card-title">Total Pendapatan</div>
-                    <div class="card-value">Rp <?= number_format($total_pendapatan, 0, ',', '.'); ?></div>
+                <div class="card" onclick="location.href='report_genre.php'">
+                    <div class="card-title">genre</div>
+                    <div class="card-value"> <?=$total_books?></div>
                 </div>
 
             </div>
