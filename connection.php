@@ -1,8 +1,8 @@
 <?php
-$host = "kprikaryasehat.site";
-$user = "kprikary_kuliah";
-$pass = "kuliahkautsar2025";
-$db   = "kprikary_kuliah";
+$host = "HOSTNAME";
+$user = "USERNAME";
+$pass = "PASS";
+$db   = "DB_NAME";
 
 $conn = new mysqli($host, $user, $pass, $db);
 
